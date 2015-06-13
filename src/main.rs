@@ -63,7 +63,7 @@ fn iterate(map: &mut Map) {
 
 fn display_map(map: &Map) {
 	let mut screen = String::with_capacity(map.len() * (map[0].len() * 3 + 1) + 7);
-	screen.push_str("\x1B[2J\x1B[H");
+	screen.push_str("\x1B[2J\x1B[H"); // clears screen and moves cursor to 1;1
 	for i in 0..map.len() {
 		for j in 0..map[0].len() {
 			if map[i][j].alive { screen.push_str(" X"); }
@@ -80,14 +80,14 @@ fn play_map(filename: &String, pause_time_ms: u32) {
 	let size_row = map[0].len();
 	for row in map.iter() { if row.len() != size_row { println!("error: map is not a rectangle"); return } }
 	let mut niter = 0usize;
-	print!("\x1B[?47h\x1B[?25l");
+	print!("\x1B[?47h\x1B[?25l"); // saves screen and hides cursor
 	loop {
 		display_map(&map);
 		println!("iteration: {}", niter);
 		iterate(&mut map);
 		niter += 1;
 		std::thread::sleep_ms(pause_time_ms);
-		unsafe { if exit { print!("\x1B[?47l\x1B[?25h"); return } }
+		unsafe { if exit { print!("\x1B[?47l\x1B[?25h"); return } } // restores screen and shows cursor
 	}
 }
 
