@@ -2,8 +2,6 @@
 extern crate libc;
 
 use std::cmp::min;
-use std::env::args;
-use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
 use libc::types::os::arch::c95::c_int;
@@ -35,7 +33,7 @@ fn print_new_map(size_args: &[String]) {
 }
 
 fn get_map(filename: &String) -> Option<Map> {
-	let file = match File::open(filename) {
+	let file = match std::fs::File::open(filename) {
 		Ok(file)	=> file,
 		Err(error)	=> { println!("{}: {}", filename, error); return None },
 	};
@@ -96,7 +94,7 @@ fn interrupt(_: c_int) {
 }
 
 fn main() {
-	let args: Vec<_> = args().collect();
+	let args: Vec<_> = std::env::args().collect();
 	if args.len() == 4 && args[1] == "genmap" { print_new_map(&args[2..4]); }
 	else if args.len() == 3 && args[1] == "play" { play_map(&args[2], 400); }
 	else if args.len() == 4 && args[1] == "play" { play_map(&args[2], args[3].parse::<u32>().unwrap()); }
