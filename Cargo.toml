@@ -2,3 +2,6 @@
 name = "gol"
 version = "0.1.0"
 authors = ["Letheed <dev@daweb.se>"]
+
+[dependencies]
+libc = "^0.2"

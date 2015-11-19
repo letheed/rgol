@@ -1,12 +1,8 @@
-#![feature(libc)]
 extern crate libc;
 
 use std::cmp::min;
-use std::io::BufRead;
-use std::io::BufReader;
-use libc::types::os::arch::c95::c_int;
-use libc::consts::os::posix88::SIGINT;
-use libc::funcs::posix01::signal::signal;
+use std::io::{BufRead, BufReader};
+use std::time::Duration;
 
 static mut exit: bool = false;
 
@@ -72,8 +68,8 @@ fn display_map(map: &Map) {
 	print!("{}{}x{}, ", screen, map.len(), map[0].len());
 }
 
-fn play_map(filename: &String, pause_time_ms: u32) {
-	unsafe { let handler = interrupt as *const u64; signal(SIGINT, handler as u64); }
+fn play_map(filename: &String, pause_time_ms: u64) {
+	unsafe { let handler = interrupt as *const usize; libc::signal(libc::SIGINT, handler as usize); }
 	let mut map = get_map(filename).unwrap();
 	let size_row = map[0].len();
 	for row in map.iter() { if row.len() != size_row { println!("error: map is not a rectangle"); return } }
@@ -84,12 +80,12 @@ fn play_map(filename: &String, pause_time_ms: u32) {
 		println!("iteration: {}", niter);
 		iterate(&mut map);
 		niter += 1;
-		std::thread::sleep_ms(pause_time_ms);
+		std::thread::sleep(Duration::from_millis(pause_time_ms));
 		unsafe { if exit { print!("\x1B[?47l\x1B[?25h"); return } } // restores screen and shows cursor
 	}
 }
 
-fn interrupt(_: c_int) {
+fn interrupt(_: libc::c_int) {
 	unsafe { exit = true; }
 }
 
@@ -97,6 +93,6 @@ fn main() {
 	let args: Vec<_> = std::env::args().collect();
 	if args.len() == 4 && args[1] == "genmap" { print_new_map(&args[2..4]); }
 	else if args.len() == 3 && args[1] == "play" { play_map(&args[2], 400); }
-	else if args.len() == 4 && args[1] == "play" { play_map(&args[2], args[3].parse::<u32>().unwrap()); }
+	else if args.len() == 4 && args[1] == "play" { play_map(&args[2], args[3].parse::<u64>().unwrap()); }
 	else { print_usage(); }
 }
