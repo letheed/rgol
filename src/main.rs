@@ -89,10 +89,7 @@ fn display_map(map: &Map) {
 }
 
 fn play_map(filename: &String, pause_time_ms: u64) {
-    unsafe {
-        let handler = interrupt as *const usize;
-        libc::signal(libc::SIGINT, handler as usize);
-    }
+    unsafe { libc::signal(libc::SIGINT, interrupt as libc::sighandler_t); }
     let mut map = get_map(filename).unwrap();
     let size_row = map[0].len();
     for row in map.iter() {
