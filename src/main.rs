@@ -99,7 +99,7 @@ fn play_map(filename: &String, pause_time_ms: u64) {
         }
     }
     let mut niter = 0usize;
-    print!("\x1B[?47h\x1B[?25l"); // save screen and hide cursor
+    print!("\x1B[?47h\x1B7\x1B[?25l"); // save screen and cursor position and hide cursor
     loop {
         display_map(&map);
         println!("iteration: {}", niter);
@@ -108,7 +108,7 @@ fn play_map(filename: &String, pause_time_ms: u64) {
         std::thread::sleep(Duration::from_millis(pause_time_ms));
         unsafe {
             if exit {
-                print!("\x1B[?47l\x1B[?25h"); // restore screen and show cursor
+                print!("\x1B[?47l\x1B8\x1B[?25h"); // restore screen and cursor position and show cursor
                 return
             }
         }
