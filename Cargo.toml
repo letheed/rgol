@@ -1,7 +1,14 @@
 [package]
-name = "gol"
-version = "0.1.0"
+name = "rgol"
+version = "1.0.0"
 authors = ["Letheed <dev@daweb.se>"]
+description = "Conway's game of life for terminal"
+repository = "https://github.com/letheed/rgol"
+readme = "README.md"
+license = "MIT"
+publish = false
 
 [dependencies]
-libc = "^0.2"
+clap = "2.15"
+libc = "0.2"
+signal = "0.3"

@@ -1,128 +1,124 @@
+#[macro_use]
+extern crate clap;
 extern crate libc;
+extern crate signal;
 
-use std::cmp::min;
-use std::io::{BufRead, BufReader};
+use clap::ArgMatches;
 use std::time::Duration;
+use world::World;
 
-const USAGE_STRING: &'static str = "\
-usage: gol genmap SIZE_V SIZE_H  (generates an empty map)
-       gol play FILE [TIME_MS]   (plays the game)
+#[macro_use]
+mod macros;
+mod world;
 
-       maps: must be rectangular
-             '·' is a dead cell, anything else is a living cell
-         ^C: exit
+const MAPS_MSG: &'static str = "\
+MAPS:
+    Maps must be rectangular. Whitespace is ignored.
+    '·' is a dead cell. Anything else is a living cell.
 ";
-
-static mut exit: bool = false;
-
-type Map = Vec<Vec<Cell>>;
-
-struct Cell {
-    alive: bool,
-    lives: bool,
-}
-
-fn print_usage() {
-    print!("{}", USAGE_STRING);
-}
-
-fn print_new_map(size_args: &[String]) {
-    let sizev = size_args[0].parse::<usize>().unwrap();
-    let sizeh = size_args[1].parse::<usize>().unwrap();
-    let map_line = std::iter::repeat('·').take(sizeh).collect::<String>();
-    for _ in 0..sizev {
-        println!("{}", map_line);
-    }
-}
-
-fn get_map(filename: &String) -> Option<Map> {
-    let file = match std::fs::File::open(filename) {
-        Ok(file) => file,
-        Err(error) => {
-            println!("{}: {}", filename, error);
-            return None
-        },
-    };
-    let reader = BufReader::new(file);
-    Some(reader.lines().map(|l| l.unwrap().chars().map(|c| match c {
-        '·' => Cell { alive: false, lives: false },
-        _   => Cell { alive: true, lives: true },
-    }).collect()).collect())
-}
-
-fn iterate(map: &mut Map) {
-    let i_max = map.len();
-    let j_max = map[0].len();
-    let mut live_neighbours: usize;
-    for i in 0..i_max {
-        for j in 0..j_max {
-            live_neighbours = 0;
-            for m in i.saturating_sub(1)..min(i + 2, i_max) {
-                for n in j.saturating_sub(1)..min(j + 2, j_max) {
-                    if map[m][n].alive && (m != i || n !=  j) { live_neighbours += 1; }
-                }
-            }
-            if !map[i][j].alive {
-                if live_neighbours == 3  { map[i][j].lives = true; }
-            }
-            else if live_neighbours < 2 || 3 < live_neighbours { map[i][j].lives = false; }
-        }
-    }
-    for i in 0..map.len() {
-        for j in 0..map[0].len() {
-            map[i][j].alive = map[i][j].lives;
-        }
-    }
-}
-
-fn display_map(map: &Map) {
-    let mut screen = String::with_capacity(map.len() * (map[0].len() * 3 + 1) + 7);
-    screen.push_str("\x1B[2J\x1B[H"); // clear screen and move cursor to 1;1
-    for i in 0..map.len() {
-        for j in 0..map[0].len() {
-            if map[i][j].alive { screen.push_str(" X"); }
-            else { screen.push_str(" ·"); }
-        }
-        screen.push('\n');
-    }
-    print!("{}{}x{}, ", screen, map.len(), map[0].len());
-}
-
-fn play_map(filename: &String, pause_time_ms: u64) {
-    unsafe { libc::signal(libc::SIGINT, interrupt as libc::sighandler_t); }
-    let mut map = get_map(filename).unwrap();
-    let size_row = map[0].len();
-    for row in map.iter() {
-        if row.len() != size_row {
-            println!("error: map is not a rectangle");
-            return
-        }
-    }
-    let mut niter = 0usize;
-    print!("\x1B[?47h\x1B7\x1B[?25l"); // save screen and cursor position and hide cursor
-    loop {
-        display_map(&map);
-        println!("iteration: {}", niter);
-        iterate(&mut map);
-        niter += 1;
-        std::thread::sleep(Duration::from_millis(pause_time_ms));
-        unsafe {
-            if exit {
-                print!("\x1B[?47l\x1B8\x1B[?25h"); // restore screen and cursor position and show cursor
-                return
-            }
-        }
-    }
-}
-
-fn interrupt(_: libc::c_int) {
-    unsafe { exit = true; }
-}
+const TICK_MS: u64 = 50;
 
 fn main() {
-    let args: Vec<_> = std::env::args().collect();
-    if args.len() == 4 && args[1] == "genmap" { print_new_map(&args[2..4]); }
-    else if args.len() == 3 && args[1] == "play" { play_map(&args[2], 400); }
-    else if args.len() == 4 && args[1] == "play" { play_map(&args[2], args[3].parse::<u64>().unwrap()); }
-    else { print_usage(); }
+    use clap::{App, AppSettings, Arg, SubCommand};
+
+    fn is_number(s: String) -> Result<(), String> {
+        if s.chars().all(|c| c.is_digit(10)) { Ok(()) }
+        else { Err(format!("in argument \"{}\": expected a number", s)) }
+    }
+
+    let app = App::new("rgol")
+        .about("Conway's game of life for terminal in Rust")
+        .author(crate_authors!())
+        .version(crate_version!())
+        .after_help(MAPS_MSG)
+        .setting(AppSettings::SubcommandRequiredElseHelp)
+        .setting(AppSettings::VersionlessSubcommands)
+        .subcommand(SubCommand::with_name("genmap")
+                    .about("Prints an empty map")
+                    .after_help(MAPS_MSG)
+                    .arg(Arg::with_name("NROW")
+                         .help("Number of rows")
+                         .required(true)
+                         .validator(is_number))
+                    .arg(Arg::with_name("NCOL")
+                         .help("Number of columns")
+                         .required(true)
+                         .validator(is_number))
+                    .arg(Arg::with_name("space")
+                         .help("Adds spaces to the map")
+                         .short("s")
+                         .long("space")))
+        .subcommand(SubCommand::with_name("play")
+                    .about("Plays the game (CTRL-c to exit)")
+                    .after_help(MAPS_MSG)
+                    .arg(Arg::with_name("FILE")
+                         .help("File containing the map")
+                         .required(true))
+                    .arg(Arg::with_name("TICK_MS")
+                         .help("Elapsed time between iterations in ms")
+                         .validator(is_number)))
+        .get_matches();
+    match app.subcommand() {
+        ("genmap", Some(args)) => genmap(args),
+        ("play",   Some(args)) => play(args),
+        _                      => unreachable!(),
+    }
+}
+
+fn genmap(args: &ArgMatches) {
+    use std::io::{Write, stdout};
+    use std::iter::repeat;
+
+    let nrow = args.value_of("NROW").expect("NROW has no value").parse().expect("NROW is not a number");
+    let ncol = args.value_of("NCOL").expect("NCOL has no value").parse().expect("NCOL is not a number");
+    if nrow == 0 || ncol == 0 { return }
+    let line = if args.is_present("space") {
+        let mut line: String = repeat("· ").take(ncol).collect();
+        line.pop();
+        line
+    }
+    else { repeat('·').take(ncol).collect() };
+    for _ in 0..nrow { writeln!(&mut stdout(), "{}", line).unwrap(); }
+}
+
+fn play(args: &ArgMatches) {
+    let filename = args.value_of("FILE").expect("FILE has no value");
+    let tick_ms = args.value_of("TICK_MS").map_or(TICK_MS, |tms| tms.parse().expect("TICK_MS is not a number"));
+    let tick = Duration::from_millis(tick_ms);
+    match World::load(filename) {
+        Ok(world) => play_world(world, tick),
+        Err(err)  => eprintln!("error: {}", err),
+    }
+}
+
+fn play_world(mut world: World, tick: Duration) {
+    use std::time::Instant;
+    use signal::trap::Trap;
+
+    prep_term();
+    let sigtrap = Trap::trap(&[libc::SIGINT]);
+    let mut deadline = Instant::now();
+    loop {
+        clear_screen();
+        println!("{}", world);
+        world.next();
+        deadline += tick;
+        if sigtrap.wait(deadline).is_some() { break }
+    }
+    restore_term();
+}
+
+fn prep_term() {
+    // save screen, cursor position and hide cursor
+    print!("{}", concat!("\x1B[?1049h", "\x1B7", "\x1B[?25l"));
+}
+
+fn clear_screen() {
+    // clear screen and move cursor to home position
+    print!("{}", concat!("\x1B[2J", "\x1B[H"));
+}
+
+fn restore_term() {
+    // restore screen, cursor position and show cursor
+    print!("{}", concat!("\x1B[?1049l", "\x1B8", "\x1B[?25h"));
 }
