@@ -1,0 +1,17 @@
+= Conway’s game of life
+:uri-gh-pages: https://letheed.github.io/rgol
+
+== Usage
+Generate an empty map, edit it and play it like so:
+
+[source, bash]
+----
+$ rgol genmap 40 40 > map
+$ nano map
+$ rgol play map
+----
+
+Inside the repository, you can use `cargo run --release --` in stead of `rgol`.
+
+== Man pages
+Check out the {uri-gh-pages}/rgol.1.html[manual].
