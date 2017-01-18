@@ -9,6 +9,7 @@ use world::World;
 
 #[macro_use]
 mod macros;
+mod screen;
 mod world;
 
 const MAPS_MSG: &'static str = "\
@@ -79,33 +80,18 @@ fn play(args: &ArgMatches) {
 }
 
 fn play_world(mut world: World, tick: Duration) {
+    use screen::Screen;
     use std::time::Instant;
     use signal::trap::Trap;
 
-    prep_term();
     let sigtrap = Trap::trap(&[libc::SIGINT]);
+    let screen = Screen::new();
     let mut deadline = Instant::now();
     loop {
-        clear_screen();
+        screen.clear();
         println!("{}", world);
         world.next();
         deadline += tick;
         if sigtrap.wait(deadline).is_some() { break }
     }
-    restore_term();
-}
-
-fn prep_term() {
-    // save screen, cursor position and hide cursor
-    print!("{}", concat!("\x1B[?1049h", "\x1B7", "\x1B[?25l"));
-}
-
-fn clear_screen() {
-    // clear screen and move cursor to home position
-    print!("{}", concat!("\x1B[2J", "\x1B[H"));
-}
-
-fn restore_term() {
-    // restore screen, cursor position and show cursor
-    print!("{}", concat!("\x1B[?1049l", "\x1B8", "\x1B[?25h"));
 }
