@@ -19,46 +19,33 @@ MAPS:
 const TICK_MS: u64 = 50;
 
 fn main() {
-    use clap::{App, AppSettings, Arg, SubCommand};
-
     fn is_number(s: String) -> Result<(), String> {
         if s.chars().all(|c| c.is_digit(10)) { Ok(()) }
-        else { Err(format!("in argument \"{}\": expected a number", s)) }
+        else { Err(format!("expected a number, found \"{}\"", s)) }
     }
 
-    let app = App::new("rgol")
-        .about("Conway's game of life for terminal in Rust")
-        .author(crate_authors!())
-        .version(crate_version!())
-        .after_help(MAPS_MSG)
-        .setting(AppSettings::SubcommandRequiredElseHelp)
-        .setting(AppSettings::VersionlessSubcommands)
-        .subcommand(SubCommand::with_name("genmap")
-                    .about("Prints an empty map")
-                    .after_help(MAPS_MSG)
-                    .arg(Arg::with_name("NROW")
-                         .help("Number of rows")
-                         .required(true)
-                         .validator(is_number))
-                    .arg(Arg::with_name("NCOL")
-                         .help("Number of columns")
-                         .required(true)
-                         .validator(is_number))
-                    .arg(Arg::with_name("space")
-                         .help("Adds spaces to the map")
-                         .short("s")
-                         .long("space")))
-        .subcommand(SubCommand::with_name("play")
-                    .about("Plays the game (CTRL-c to exit)")
-                    .after_help(MAPS_MSG)
-                    .arg(Arg::with_name("FILE")
-                         .help("File containing the map")
-                         .required(true))
-                    .arg(Arg::with_name("TICK_MS")
-                         .help("Elapsed time between iterations in ms")
-                         .validator(is_number)))
-        .get_matches();
-    match app.subcommand() {
+    let matches = clap_app!( rgol =>
+        (about: "Conway's game of life for terminal in Rust")
+        (author: crate_authors!())
+        (version: crate_version!())
+        (after_help: MAPS_MSG)
+        (@setting SubcommandRequiredElseHelp)
+        (@setting VersionlessSubcommands)
+        (@subcommand genmap =>
+            (about: "Prints an empty map")
+            (after_help: MAPS_MSG)
+            (@arg NROW: {is_number} * "Number of rows")
+            (@arg NCOL: {is_number} * "Number of columns")
+            (@arg space: -s --space "Adds spaces to the map"))
+        (@subcommand play =>
+            (about: "Plays the game (CTRL-c to exit)")
+            (after_help: MAPS_MSG)
+            (@arg FILE: * "File containing the map")
+            (@arg TICK_MS: {is_number} "Elapsed time between iterations in ms")
+        )
+    ).get_matches();
+
+    match matches.subcommand() {
         ("genmap", Some(args)) => genmap(args),
         ("play",   Some(args)) => play(args),
         _                      => unreachable!(),
