@@ -55,17 +55,16 @@ fn main() {
 
 fn genmap(args: &ArgMatches) {
     use std::io::{Write, stdout};
-    use std::iter::repeat;
 
     let nrow = args.value_of("NROW").expect("NROW has no value").parse().expect("NROW is not a number");
     let ncol = args.value_of("NCOL").expect("NCOL has no value").parse().expect("NCOL is not a number");
     if nrow == 0 || ncol == 0 { return }
     let line = if args.is_present("space") {
-        let mut line: String = repeat("· ").take(ncol).collect();
+        let mut line = "· ".repeat(ncol);
         line.pop();
         line
     }
-    else { repeat('·').take(ncol).collect() };
+    else { "·".repeat(ncol) };
     for _ in 0..nrow { writeln!(&mut stdout(), "{}", line).unwrap(); }
 }
 
