@@ -12,12 +12,13 @@ mod macros;
 mod screen;
 mod world;
 
-const MAPS_MSG: &'static str = "\
+const TICK_MS: u64 = 50;
+
+static MAPS_MSG: &str = "\
 MAPS:
     Maps must be rectangular. Whitespace is ignored.
     '·' is a dead cell. Anything else is a living cell.
 ";
-const TICK_MS: u64 = 50;
 
 fn main() {
     fn is_number(s: String) -> Result<(), String> {
@@ -54,8 +55,6 @@ fn main() {
 }
 
 fn genmap(args: &ArgMatches) {
-    use std::io::{Write, stdout};
-
     let nrow = args.value_of("NROW").expect("NROW has no value").parse().expect("NROW is not a number");
     let ncol = args.value_of("NCOL").expect("NCOL has no value").parse().expect("NCOL is not a number");
     if nrow == 0 || ncol == 0 { return }
@@ -65,7 +64,7 @@ fn genmap(args: &ArgMatches) {
         line
     }
     else { "·".repeat(ncol) };
-    for _ in 0..nrow { writeln!(&mut stdout(), "{}", line).unwrap(); }
+    for _ in 0..nrow { println!("{}", line); }
 }
 
 fn play(args: &ArgMatches) {
