@@ -1,7 +1,7 @@
 [package]
 name = "rgol"
 version = "1.0.0"
-authors = ["Letheed <dev@daweb.se>"]
+authors = ["Letheed <letheed@outlook.com>"]
 description = "Conway's game of life for terminal"
 repository = "https://github.com/letheed/rgol"
 readme = "README.adoc"

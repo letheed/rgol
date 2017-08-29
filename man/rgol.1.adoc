@@ -35,7 +35,7 @@ Whitespace is ignored.
 Anything else is a living cell.
 
 == AUTHOR
-mailto:dev@daweb.se[Letheed]
+mailto:letheed@outlook.com[Letheed]
 
 == SOURCE
 {uri-repo}[Repository] +
