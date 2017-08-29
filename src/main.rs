@@ -7,8 +7,6 @@ use clap::ArgMatches;
 use std::time::Duration;
 use world::World;
 
-#[macro_use]
-mod macros;
 mod screen;
 mod world;
 
