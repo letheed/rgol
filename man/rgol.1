@@ -1,54 +1,40 @@
-'\" t
-.\"     Title: rgol
-.\"    Author: [see the "AUTHORS" section]
-.\" Generator: Asciidoctor 1.5.5
-.\"      Date: 2016-12-30
-.\"    Manual: User Commands
-.\"    Source: rgol 1.0.0
-.\"  Language: English
-.\"
-.TH "RGOL" "1" "2016-12-30" "rgol 1.0.0" "User Commands"
-.ie \n(.g .ds Aq \(aq
-.el       .ds Aq '
-.ss \n[.ss] 0
-.de URL
-\\$2 \(laURL: \\$1 \(ra\\$3
-..
-.if \n[.g] .mso www.tmac
-.LINKSTYLE blue R < >
-.SH "NAME"
-rgol \- Conway’s game of life in Rust for terminals
-.SH "SYNOPSIS"
-\fBrgol\fP \fBgenmap\fP \fINROW\fP \fINCOL\fP [\fB\-s\fP]
+.TH RGOL 1 "2016\-12\-30" "rgol 1.0.0" "User Commands"
+.SH NAME
+.PP
+rgol \- Conway's game of life in Rust for terminals
+.SH SYNOPSIS
+.PP
+\fB\fCrgol\fR \fB\fCgenmap\fR \fINROW\fP \fINCOL\fP [\fB\fC\-s\fR]
 .br
-\fBrgol\fP \fBplay\fP \fIFILE\fP [\fITICK_MS\fP]
-.SH "DESCRIPTION"
+\fB\fCrgol\fR \fB\fCplay\fR \fIFILE\fP [\fITICK_MS\fP]
+.SH DESCRIPTION
 .TP
-\fBgenmap\fP
+\fB\fCgenmap\fR
 Print an empty map.
 .TP
-\fBplay\fP
+\fB\fCplay\fR
 Play the game.
 .br
-Ctrl\0+\0c exits cleanly and restores your terminal.
-.SH "OPTIONS"
+Ctrl + c exits cleanly
+.SH OPTIONS
 .TP
-\fB\-s\fP, \fB\-\-space\fP
+\fB\fC\-s\fR, \fB\fC\-\-space\fR
 Add spaces to the map.
 .br
 Makes the map somewhat isotropic with monospaced fonts.
-.SH "MAPS"
+.SH MAPS
+.PP
 Maps must be rectangular.
-.sp
-Whitespace is ignored.
-‘·’ (U+00B7 MIDDLE DOT) is a dead cell.
-Anything else is a living cell.
-.SH "AUTHOR"
-.MTO "letheed\(atoutlook.com" "Letheed" ""
-.SH "SOURCE"
-.URL "https://github.com/letheed/rgol" "Repository" ""
+.PP
+Whitespace is ignored. ‘·’ (U+00B7 MIDDLE DOT) is a dead cell. Anything else is a living cell.
+.SH AUTHOR
+.PP
+Letheed \[la]letheed@outlook.com\[ra]
+.SH SOURCE
+.PP
+Repository \[la]https://github.com/letheed/rgol\[ra]
 .br
-.URL "https://github.com/letheed/rgol/issues" "Bug tracker" ""
-.SH "COPYRIGHT"
-Copyright © 2015 Letheed.
-License MIT.
+Bug tracker \[la]https://github.com/letheed/rgol/issues\[ra]
+.SH COPYRIGHT
+.PP
+Copyright © 2015 Letheed. License MIT.
