@@ -78,9 +78,10 @@ fn play(args: &ArgMatches) {
 fn play_world(mut world: World, tick: Duration) {
     use screen::Screen;
     use std::time::Instant;
+    use signal::Signal;
     use signal::trap::Trap;
 
-    let sigtrap = Trap::trap(&[libc::SIGINT]);
+    let sigtrap = Trap::trap(&[Signal::SIGINT]);
     let screen = Screen::new();
     let mut deadline = Instant::now();
     loop {
