@@ -20,8 +20,11 @@ MAPS:
 
 fn main() {
     fn is_number(s: String) -> Result<(), String> {
-        if s.chars().all(|c| c.is_digit(10)) { Ok(()) }
-        else { Err(format!("expected a number, found \"{}\"", s)) }
+        if s.chars().all(|c| c.is_digit(10)) {
+            Ok(())
+        } else {
+            Err(format!("expected a number, found \"{}\"", s))
+        }
     }
 
     let matches = clap_app!( rgol =>
@@ -47,22 +50,27 @@ fn main() {
 
     match matches.subcommand() {
         ("genmap", Some(args)) => genmap(args),
-        ("play",   Some(args)) => play(args),
-        _                      => unreachable!(),
+        ("play", Some(args)) => play(args),
+        _ => unreachable!(),
     }
 }
 
 fn genmap(args: &ArgMatches) {
     let nrow = args.value_of("NROW").expect("NROW has no value").parse().expect("NROW is not a number");
     let ncol = args.value_of("NCOL").expect("NCOL has no value").parse().expect("NCOL is not a number");
-    if nrow == 0 || ncol == 0 { return }
+    if nrow == 0 || ncol == 0 {
+        return;
+    }
     let line = if args.is_present("space") {
         let mut line = "· ".repeat(ncol);
         line.pop();
         line
+    } else {
+        "·".repeat(ncol)
+    };
+    for _ in 0..nrow {
+        println!("{}", line);
     }
-    else { "·".repeat(ncol) };
-    for _ in 0..nrow { println!("{}", line); }
 }
 
 fn play(args: &ArgMatches) {
@@ -71,7 +79,7 @@ fn play(args: &ArgMatches) {
     let tick = Duration::from_millis(tick_ms);
     match World::load(filename) {
         Ok(world) => play_world(world, tick),
-        Err(err)  => eprintln!("error: {}", err),
+        Err(err) => eprintln!("error: {}", err),
     }
 }
 
@@ -89,6 +97,8 @@ fn play_world(mut world: World, tick: Duration) {
         println!("{}", world);
         world.next();
         deadline += tick;
-        if sigtrap.wait(deadline).is_some() { break }
+        if sigtrap.wait(deadline).is_some() {
+            break;
+        }
     }
 }

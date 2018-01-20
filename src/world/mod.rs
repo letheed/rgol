@@ -35,6 +35,6 @@ impl World {
 
 impl World {
     fn new(map: Map) -> Self {
-        World { map: map, iterations: 0 }
+        World { map, iterations: 0 }
     }
 }
