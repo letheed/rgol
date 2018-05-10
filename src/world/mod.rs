@@ -18,13 +18,8 @@ impl Display for World {
 
 impl World {
     pub fn load(filename: &str) -> Result<Self, Box<Error>> {
-        use std::fs::File;
-        use std::io::Read;
-
-        let mut file = File::open(filename)?;
-        let mut map = String::new();
-        file.read_to_string(&mut map)?;
-        map.parse().map(World::new).map_err(Into::into)
+        let map = ::std::fs::read_to_string(filename)?.parse()?;
+        Ok(World::new(map))
     }
 
     pub fn next(&mut self) {
