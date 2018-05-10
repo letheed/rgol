@@ -11,4 +11,4 @@ publish = false
 [dependencies]
 clap = "2"
 libc = "0.2"
-signal = "0.4"
+signal = "0.5"
