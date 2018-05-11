@@ -9,7 +9,7 @@ mod cell;
 mod error;
 
 pub struct Map {
-    data: Vec<Cell>,
+    data: Box<[Cell]>,
     nrow: usize,
     ncol: usize,
 }
@@ -105,7 +105,7 @@ impl Map {
                 }
             }
         }
-        for cell in &mut self.data {
+        for cell in &mut *self.data {
             cell.alive = cell.lives;
         }
     }
@@ -114,6 +114,6 @@ impl Map {
 impl Map {
     fn from_parts_unchecked(cells: Vec<Cell>, (nrow, ncol): (usize, usize)) -> Self {
         assert_eq!(cells.len(), nrow * ncol);
-        Map { data: cells, nrow, ncol }
+        Map { data: cells.into_boxed_slice(), nrow, ncol }
     }
 }
