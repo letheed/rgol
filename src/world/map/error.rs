@@ -17,7 +17,7 @@ impl Display for ParseMapError {
 
 impl Error for ParseMapError {
     fn description(&self) -> &str {
-        match *self {
+        match self {
             Empty => "map is empty",
             NotRectangular => "map is not rectangular",
         }
