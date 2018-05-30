@@ -56,8 +56,14 @@ fn main() {
 }
 
 fn genmap(args: &ArgMatches) {
-    let nrow = args.value_of("NROW").expect("NROW has no value").parse().expect("NROW is not a number");
-    let ncol = args.value_of("NCOL").expect("NCOL has no value").parse().expect("NCOL is not a number");
+    let nrow = args.value_of("NROW")
+        .expect("NROW has no value")
+        .parse()
+        .expect("NROW is not a number");
+    let ncol = args.value_of("NCOL")
+        .expect("NCOL has no value")
+        .parse()
+        .expect("NCOL is not a number");
     if nrow == 0 || ncol == 0 {
         return;
     }
@@ -75,7 +81,8 @@ fn genmap(args: &ArgMatches) {
 
 fn play(args: &ArgMatches) {
     let filename = args.value_of("FILE").expect("FILE has no value");
-    let tick_ms = args.value_of("TICK_MS").map_or(TICK_MS, |tms| tms.parse().expect("TICK_MS is not a number"));
+    let tick_ms = args.value_of("TICK_MS")
+        .map_or(TICK_MS, |tms| tms.parse().expect("TICK_MS is not a number"));
     let tick = Duration::from_millis(tick_ms);
     match World::load(filename) {
         Ok(world) => play_world(world, tick),
@@ -85,9 +92,9 @@ fn play(args: &ArgMatches) {
 
 fn play_world(mut world: World, tick: Duration) {
     use screen::Screen;
-    use std::time::Instant;
-    use signal::Signal;
     use signal::trap::Trap;
+    use signal::Signal;
+    use std::time::Instant;
 
     let sigtrap = Trap::trap(&[Signal::SIGINT]);
     let screen = Screen::new();

@@ -12,7 +12,13 @@ pub struct World {
 
 impl Display for World {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "{}\n{:?}, iterations: {}", self.map, self.map.dim(), self.iterations)
+        write!(
+            f,
+            "{}\n{:?}, iterations: {}",
+            self.map,
+            self.map.dim(),
+            self.iterations
+        )
     }
 }
 
