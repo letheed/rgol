@@ -1,25 +1,33 @@
-#[macro_use]
-extern crate clap;
-extern crate libc;
-extern crate signal;
+#![warn(rust_2018_idioms)]
+#![deny(unsafe_code)]
 
+use anyhow::{anyhow, Context};
 use clap::ArgMatches;
-use std::time::Duration;
-use world::World;
+use rgol::World;
+use std::{result::Result as StdResult, time::Duration};
 
 mod screen;
-mod world;
 
 const TICK_MS: u64 = 50;
-
-static MAPS_MSG: &str = "\
+const MAPS_MSG: &str = "\
 MAPS:
     Maps must be rectangular. Whitespace is ignored.
-    '·' is a dead cell. Anything else is a living cell.
-";
+    '·' (U+00B7 MIDDLE DOT) is a dead cell. Anything else is a living cell.";
+
+type Result<T = ()> = anyhow::Result<T>;
 
 fn main() {
-    fn is_number(s: String) -> Result<(), String> {
+    if let Err(err) = run() {
+        eprintln!("error: {}", err);
+        std::process::exit(1);
+    }
+}
+
+fn run() -> Result {
+    use clap::{clap_app, crate_authors, crate_version};
+
+    #[allow(clippy::needless_pass_by_value)]
+    fn is_number(s: String) -> StdResult<(), String> {
         if s.chars().all(|c| c.is_digit(10)) {
             Ok(())
         } else {
@@ -27,45 +35,52 @@ fn main() {
         }
     }
 
-    let matches = clap_app!( rgol =>
+    let matches = clap_app!(rgol =>
         (about: "Conway's game of life for terminal in Rust")
         (author: crate_authors!())
         (version: crate_version!())
         (after_help: MAPS_MSG)
+        (@setting ColoredHelp)
         (@setting SubcommandRequiredElseHelp)
         (@setting VersionlessSubcommands)
         (@subcommand genmap =>
             (about: "Prints an empty map")
-            (after_help: MAPS_MSG)
+            (@setting ColoredHelp)
             (@arg NROW: {is_number} * "Number of rows")
             (@arg NCOL: {is_number} * "Number of columns")
             (@arg space: -s --space "Adds spaces to the map"))
         (@subcommand play =>
             (about: "Plays the game (CTRL-c to exit)")
-            (after_help: MAPS_MSG)
+            (@setting ColoredHelp)
             (@arg FILE: * "File containing the map")
             (@arg TICK_MS: {is_number} "Elapsed time between iterations in ms")
         )
-    ).get_matches();
+    )
+    .get_matches();
 
     match matches.subcommand() {
         ("genmap", Some(args)) => genmap(args),
         ("play", Some(args)) => play(args),
-        _ => unreachable!(),
+        _ => anyhow::bail!("subcommands failed to match properly"),
     }
 }
 
-fn genmap(args: &ArgMatches) {
-    let nrow = args.value_of("NROW")
-        .expect("NROW has no value")
+/// "genmap" subcommand.
+///
+/// Prints an empty map.
+fn genmap(args: &ArgMatches<'_>) -> Result {
+    let nrow = args
+        .value_of("NROW")
+        .ok_or_else(|| anyhow!("NROW has no value"))?
         .parse()
-        .expect("NROW is not a number");
-    let ncol = args.value_of("NCOL")
-        .expect("NCOL has no value")
+        .context("NROW is not a number")?;
+    let ncol = args
+        .value_of("NCOL")
+        .ok_or_else(|| anyhow!("NCOL has no value"))?
         .parse()
-        .expect("NCOL is not a number");
+        .context("NCOL is not a number")?;
     if nrow == 0 || ncol == 0 {
-        return;
+        return Ok(());
     }
     let line = if args.is_present("space") {
         let mut line = "· ".repeat(ncol);
@@ -77,27 +92,33 @@ fn genmap(args: &ArgMatches) {
     for _ in 0..nrow {
         println!("{}", line);
     }
+    Ok(())
 }
 
-fn play(args: &ArgMatches) {
-    let filename = args.value_of("FILE").expect("FILE has no value");
-    let tick_ms = args.value_of("TICK_MS")
-        .map_or(TICK_MS, |tms| tms.parse().expect("TICK_MS is not a number"));
+/// "play" subcommand.
+///
+/// Loads a map from a file and seeds the world with it, then plays it.
+fn play(args: &ArgMatches<'_>) -> Result {
+    let filename = args.value_of("FILE").ok_or_else(|| anyhow!("FILE has no value"))?;
+    let tick_ms = args
+        .value_of("TICK_MS")
+        .map_or(Some(TICK_MS), |t_ms| t_ms.parse().ok())
+        .ok_or_else(|| anyhow!("TICK_MS is not a number"))?;
     let tick = Duration::from_millis(tick_ms);
-    match World::load(filename) {
-        Ok(world) => play_world(world, tick),
-        Err(err) => eprintln!("error: {}", err),
-    }
+    let world = World::load(filename)?;
+    play_world(world, tick)?;
+    Ok(())
 }
 
-fn play_world(mut world: World, tick: Duration) {
-    use screen::Screen;
-    use signal::trap::Trap;
-    use signal::Signal;
+/// Plays the world.
+///
+/// Prints every generation to the terminal screen.
+fn play_world(mut world: World, tick: Duration) -> Result {
+    use signal::{trap::Trap, Signal};
     use std::time::Instant;
 
     let sigtrap = Trap::trap(&[Signal::SIGINT]);
-    let screen = Screen::new();
+    let screen = screen::Screen::init()?;
     let mut deadline = Instant::now();
     loop {
         screen.clear();
@@ -108,4 +129,5 @@ fn play_world(mut world: World, tick: Duration) {
             break;
         }
     }
+    Ok(())
 }
