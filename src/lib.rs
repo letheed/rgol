@@ -1,5 +1,6 @@
-use map::Map;
 use std::fmt::{self, Display};
+
+use map::Map;
 
 mod map;
 

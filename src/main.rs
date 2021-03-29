@@ -1,10 +1,11 @@
 #![warn(rust_2018_idioms)]
 #![deny(unsafe_code)]
 
+use std::{result::Result as StdResult, time::Duration};
+
 use anyhow::{anyhow, Context};
 use clap::ArgMatches;
 use rgol::World;
-use std::{result::Result as StdResult, time::Duration};
 
 mod screen;
 
@@ -114,8 +115,9 @@ fn play(args: &ArgMatches<'_>) -> Result {
 ///
 /// Prints every generation to the terminal screen.
 fn play_world(mut world: World, tick: Duration) -> Result {
-    use signal::{trap::Trap, Signal};
     use std::time::Instant;
+
+    use signal::{trap::Trap, Signal};
 
     let sigtrap = Trap::trap(&[Signal::SIGINT]);
     let screen = screen::Screen::init()?;

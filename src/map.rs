@@ -1,10 +1,11 @@
-use cell::Cell;
 use std::{
     error::Error,
     fmt::{self, Display},
     ops::{Index, IndexMut},
     str::FromStr,
 };
+
+use cell::Cell;
 
 mod cell;
 
