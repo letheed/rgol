@@ -1,4 +1,8 @@
 #![warn(rust_2018_idioms)]
+#![warn(clippy::pedantic)]
+#![warn(clippy::cargo)]
+#![warn(clippy::nursery)]
+#![allow(clippy::non_ascii_literal)]
 #![deny(unsafe_code)]
 
 use std::{result::Result as StdResult, time::Duration};
@@ -107,8 +111,7 @@ fn play(args: &ArgMatches<'_>) -> Result {
         .ok_or_else(|| anyhow!("TICK_MS is not a number"))?;
     let tick = Duration::from_millis(tick_ms);
     let world = World::load(filename)?;
-    play_world(world, tick)?;
-    Ok(())
+    play_world(world, tick)
 }
 
 /// Plays the world.
@@ -117,10 +120,11 @@ fn play(args: &ArgMatches<'_>) -> Result {
 fn play_world(mut world: World, tick: Duration) -> Result {
     use std::time::Instant;
 
+    use screen::Screen;
     use signal::{trap::Trap, Signal};
 
     let sigtrap = Trap::trap(&[Signal::SIGINT]);
-    let screen = screen::Screen::init()?;
+    let screen = Screen::init()?;
     let mut deadline = Instant::now();
     loop {
         screen.clear();
@@ -128,8 +132,7 @@ fn play_world(mut world: World, tick: Duration) -> Result {
         world.next();
         deadline += tick;
         if sigtrap.wait(deadline).is_some() {
-            break;
+            return Ok(());
         }
     }
-    Ok(())
 }

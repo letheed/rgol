@@ -10,7 +10,7 @@ use cell::Cell;
 mod cell;
 
 #[derive(Debug)]
-pub(super) enum ParseMapError {
+pub enum ParseMapError {
     Empty,
     NotRectangular,
 }
@@ -27,7 +27,7 @@ impl Display for ParseMapError {
 }
 
 /// A rectangular map of the world containing cells.
-pub(super) struct Map {
+pub struct Map {
     /// Array storing the cells in row-major order.
     cells: Box<[Cell]>,
     /// Number of rows in the map.
@@ -40,7 +40,7 @@ impl FromStr for Map {
     type Err = ParseMapError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use ParseMapError::*;
+        use ParseMapError::{Empty, NotRectangular};
 
         if s.is_empty() {
             return Err(Empty);
@@ -100,7 +100,7 @@ impl Display for Map {
 
 impl Map {
     /// Returns the vertical and horizontal dimensions of the map.
-    pub(super) fn dim(&self) -> (usize, usize) {
+    pub const fn dim(&self) -> (usize, usize) {
         (self.nrow, self.ncol)
     }
 
@@ -109,7 +109,7 @@ impl Map {
     /// Births and deaths happen simultaneously according to the rules
     /// of Conway's Game of Life, after which the map contains
     /// the next generation.
-    pub(super) fn next(&mut self) {
+    pub fn next(&mut self) {
         for i in 0..self.nrow {
             for j in 0..self.ncol {
                 let live_neighbours = self.live_neighbours((i, j));
@@ -118,7 +118,7 @@ impl Map {
                     if live_neighbours == 3 {
                         cell.lives = true;
                     }
-                } else if live_neighbours < 2 || 3 < live_neighbours {
+                } else if live_neighbours != 2 && live_neighbours != 3 {
                     cell.lives = false;
                 }
             }
