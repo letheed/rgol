@@ -5,9 +5,10 @@
 #![allow(clippy::non_ascii_literal)]
 #![deny(unsafe_code)]
 
+use std::fmt::{self, Display};
 use std::{result::Result as StdResult, time::Duration};
 
-use anyhow::{anyhow, Context};
+use anyhow::{anyhow, Context, Error};
 use clap::ArgMatches;
 use rgol::World;
 
@@ -23,7 +24,7 @@ type Result<T = ()> = anyhow::Result<T>;
 
 fn main() {
     if let Err(err) = run() {
-        eprintln!("error: {}", err);
+        eprintln!("error{}", DisplayCauses(err));
         std::process::exit(1);
     }
 }
@@ -110,7 +111,7 @@ fn play(args: &ArgMatches<'_>) -> Result {
         .map_or(Some(TICK_MS), |t_ms| t_ms.parse().ok())
         .ok_or_else(|| anyhow!("TICK_MS is not a number"))?;
     let tick = Duration::from_millis(tick_ms);
-    let world = World::load(filename)?;
+    let world = World::load(filename).with_context(|| filename.to_string())?;
     play_world(world, tick)
 }
 
@@ -134,5 +135,18 @@ fn play_world(mut world: World, tick: Duration) -> Result {
         if sigtrap.wait(deadline).is_some() {
             return Ok(());
         }
+    }
+}
+
+
+/// Displays the causes of an `Error` recursively.
+struct DisplayCauses(Error);
+
+impl Display for DisplayCauses {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for cause in self.0.chain() {
+            write!(f, ": {}", cause)?;
+        }
+        Ok(())
     }
 }
