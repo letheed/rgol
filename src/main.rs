@@ -5,8 +5,11 @@
 #![allow(clippy::non_ascii_literal)]
 #![deny(unsafe_code)]
 
-use std::fmt::{self, Display};
-use std::{result::Result as StdResult, time::Duration};
+use std::{
+    fmt::{self, Display},
+    result::Result as StdResult,
+    time::Duration,
+};
 
 use anyhow::{anyhow, Context, Error};
 use clap::ArgMatches;
@@ -118,6 +121,9 @@ fn play(args: &ArgMatches<'_>) -> Result {
 /// Plays the world.
 ///
 /// Prints every generation to the terminal screen.
+#[cfg(target_os = "linux")]
+// The `signal` crate only defines `Trap::wait` for linux, though it should
+// work anywhere `sigtimedwait` is defined (which doesn’t include macOS).
 fn play_world(mut world: World, tick: Duration) -> Result {
     use std::time::Instant;
 
@@ -138,6 +144,53 @@ fn play_world(mut world: World, tick: Duration) -> Result {
     }
 }
 
+/// Plays the world.
+///
+/// Prints every generation to the terminal screen.
+#[cfg(all(unix, not(target_os = "linux")))]
+// Anywhere `Trap::wait` isn’t defined we’ll have to rely on `sigwait`
+// (through `Iterator::next`) though presumably some of those targets
+// do define `sigtimedwait`.
+fn play_world(mut world: World, tick: Duration) -> Result {
+    use std::{
+        panic,
+        sync::mpsc::{channel, RecvTimeoutError},
+        thread,
+        time::Instant,
+    };
+
+    use screen::Screen;
+    use signal::{trap::Trap, Signal};
+
+    let sigtrap = Trap::trap(&[Signal::SIGINT]);
+    let screen = Screen::init()?;
+    let mut deadline = Instant::now();
+    let (sender, receiver) = channel();
+    let player = thread::spawn(move || {
+        loop {
+            screen.clear();
+            println!("{}", world);
+            world.next();
+            deadline += tick;
+            let duration = deadline.saturating_duration_since(Instant::now());
+            // TODO Use `Receiver::recv_deadline` when it becomes stable.
+            match receiver.recv_timeout(duration) {
+                Err(RecvTimeoutError::Timeout) => {}
+                Ok(()) | Err(RecvTimeoutError::Disconnected) => return,
+            }
+        }
+    });
+    let signal = sigtrap.into_iter().next();
+    sender.send(())?;
+    if let Err(e) = player.join() {
+        panic::resume_unwind(e);
+    }
+    match signal {
+        Some(Signal::SIGINT) => Ok(()),
+        Some(_) => anyhow::bail!("`Trap` returned with unexpected {:?} signal", signal),
+        None => anyhow::bail!("`Trap` returned but no signal was received"),
+    }
+}
 
 /// Displays the causes of an `Error` recursively.
 struct DisplayCauses(Error);
