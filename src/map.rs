@@ -42,27 +42,27 @@ impl FromStr for Map {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         use ParseMapError::{Empty, NotRectangular};
 
-        if s.is_empty() {
-            return Err(Empty);
-        }
-        let lines = s.lines().collect::<Vec<_>>();
-        if lines.iter().all(|line| line.is_empty()) {
-            return Err(Empty);
-        }
-        let (nrow, ncol) = (lines.len(), lines[0].chars().filter(|c| !c.is_whitespace()).count());
-        let mut cells = Vec::with_capacity(nrow * ncol);
-        for line in lines {
-            let mut nchar = 0;
+        let mut nrow = 0;
+        let mut ncol = 0;
+        let mut cells = Vec::with_capacity(s.len());
+        for line in s.lines() {
+            nrow += 1;
+            let mut ncell = 0;
             for c in line.chars().filter(|c| !c.is_whitespace()) {
-                nchar += 1;
+                ncell += 1;
                 cells.push(match c {
                     '·' => Cell::new_dead(),
                     _ => Cell::new_alive(),
                 });
             }
-            if nchar != ncol {
+            if nrow == 1 {
+                ncol = ncell;
+            } else if ncell != ncol {
                 return Err(NotRectangular);
             }
+        }
+        if cells.is_empty() {
+            return Err(Empty);
         }
         Ok(Self::from_parts(cells, (nrow, ncol)))
     }
