@@ -12,11 +12,9 @@
 //! ‘·’ (U+00B7 MIDDLE DOT) is a dead cell. Anything else is a living cell.
 
 #![warn(missing_docs)]
-#![warn(rust_2018_idioms)]
 #![warn(clippy::pedantic)]
 #![warn(clippy::cargo)]
 #![warn(clippy::nursery)]
-#![allow(clippy::non_ascii_literal)]
 #![deny(unsafe_code)]
 
 use std::fmt::{self, Display};

@@ -1,8 +1,6 @@
-#![warn(rust_2018_idioms)]
 #![warn(clippy::pedantic)]
 #![warn(clippy::cargo)]
 #![warn(clippy::nursery)]
-#![allow(clippy::non_ascii_literal)]
 #![deny(unsafe_code)]
 
 use std::{
