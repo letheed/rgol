@@ -97,7 +97,7 @@ fn genmap(args: &ArgMatches<'_>) -> Result {
         "·".repeat(ncol)
     };
     for _ in 0..nrow {
-        println!("{}", line);
+        println!("{line}");
     }
     Ok(())
 }
@@ -138,7 +138,7 @@ fn play_world(mut world: World, tick: Duration) -> Result {
     let mut deadline = Instant::now();
     loop {
         screen.clear();
-        println!("{}", world);
+        println!("{world}");
         world.next();
         deadline += tick;
         if sigtrap.wait(deadline).is_some() {
@@ -172,7 +172,7 @@ fn play_world(mut world: World, tick: Duration) -> Result {
     let player = thread::spawn(move || {
         loop {
             screen.clear();
-            println!("{}", world);
+            println!("{world}");
             world.next();
             deadline += tick;
             let duration = deadline.saturating_duration_since(Instant::now());

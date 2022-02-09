@@ -7,7 +7,7 @@ repository = "https://github.com/letheed/rgol"
 readme = "README.md"
 license = "MIT"
 publish = false
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 anyhow = "1.0"
