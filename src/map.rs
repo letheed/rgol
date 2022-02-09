@@ -134,7 +134,7 @@ impl Map {
     ///
     /// # Panics
     ///
-    /// Panics if the number of cells in not `nrow * ncol`.
+    /// Panics if the number of cells is not `nrow * ncol`.
     fn from_parts(cells: Vec<Cell>, (nrow, ncol): (usize, usize)) -> Self {
         assert_eq!(cells.len(), nrow * ncol);
         Self { cells: cells.into_boxed_slice(), nrow, ncol }
