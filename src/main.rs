@@ -3,13 +3,9 @@
 #![warn(clippy::nursery)]
 #![deny(unsafe_code)]
 
-use std::{
-    fmt::{self, Display},
-    result::Result as StdResult,
-    time::Duration,
-};
+use std::{result::Result as StdResult, time::Duration};
 
-use anyhow::{anyhow, Context, Error};
+use anyhow::{anyhow, Context};
 use clap::ArgMatches;
 use rgol::World;
 
@@ -23,14 +19,7 @@ MAPS:
 
 type Result<T = ()> = anyhow::Result<T>;
 
-fn main() {
-    if let Err(err) = run() {
-        eprintln!("error{}", DisplayCauses(err));
-        std::process::exit(1);
-    }
-}
-
-fn run() -> Result {
+fn main() -> Result {
     use clap::{clap_app, crate_authors, crate_version};
 
     #[allow(clippy::needless_pass_by_value)]
@@ -112,7 +101,7 @@ fn play(args: &ArgMatches<'_>) -> Result {
         .map_or(Some(TICK_MS), |t_ms| t_ms.parse().ok())
         .ok_or_else(|| anyhow!("TICK_MS is not a number"))?;
     let tick = Duration::from_millis(tick_ms);
-    let world = load_world(filename).with_context(|| filename.to_string())?;
+    let world = load_world(filename).with_context(|| format!("in {}", filename))?;
     play_world(world, tick)
 }
 
@@ -192,17 +181,5 @@ fn play_world(mut world: World, tick: Duration) -> Result {
         Some(Signal::SIGINT) => Ok(()),
         Some(_) => anyhow::bail!("`Trap` returned with unexpected {:?} signal", signal),
         None => anyhow::bail!("`Trap` returned but no signal was received"),
-    }
-}
-
-/// Displays the causes of an `Error` recursively.
-struct DisplayCauses(Error);
-
-impl Display for DisplayCauses {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for cause in self.0.chain() {
-            write!(f, ": {}", cause)?;
-        }
-        Ok(())
     }
 }
