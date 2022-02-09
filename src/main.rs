@@ -112,8 +112,13 @@ fn play(args: &ArgMatches<'_>) -> Result {
         .map_or(Some(TICK_MS), |t_ms| t_ms.parse().ok())
         .ok_or_else(|| anyhow!("TICK_MS is not a number"))?;
     let tick = Duration::from_millis(tick_ms);
-    let world = World::load(filename).with_context(|| filename.to_string())?;
+    let world = load_world(filename).with_context(|| filename.to_string())?;
     play_world(world, tick)
+}
+
+/// Loads and parses the world from a file.
+fn load_world(filename: &str) -> Result<World> {
+    Ok(std::fs::read_to_string(filename)?.parse()?)
 }
 
 /// Plays the world.

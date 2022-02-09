@@ -3,7 +3,8 @@
 //! This library is not meant for general usage.
 //! It does not use any of the established file formats for the Game of Life.
 //!
-//! It can only do two things: load a map to create a world, and make it tick.
+//! It can only do three things: parse a map to create a world, make it tick,
+//! and print it.
 //!
 //! # Maps
 //!
@@ -17,9 +18,12 @@
 #![warn(clippy::nursery)]
 #![deny(unsafe_code)]
 
-use std::fmt::{self, Display};
+use std::{
+    fmt::{self, Display},
+    str::FromStr,
+};
 
-use map::Map;
+use map::{Map, ParseMapError};
 
 mod map;
 
@@ -31,6 +35,14 @@ pub struct World {
     generation: u64,
 }
 
+impl FromStr for World {
+    type Err = ParseMapError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ok(Self::new(s.parse()?))
+    }
+}
+
 impl Display for World {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}\n{:?}, generation: {}", self.map, self.map.dim(), self.generation)
@@ -38,17 +50,6 @@ impl Display for World {
 }
 
 impl World {
-    /// Reads a file as a map and seeds a world with it.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if there was a problem opening or reading the file
-    /// or if the map was empty or not rectangular.
-    pub fn load(filename: &str) -> anyhow::Result<Self> {
-        let map = std::fs::read_to_string(filename)?.parse()?;
-        Ok(Self::new(map))
-    }
-
     /// Increments the time by one tick.
     ///
     /// The next generation will replace the current one.
