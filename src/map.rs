@@ -9,10 +9,20 @@ use cell::Cell;
 
 mod cell;
 
+/// An error returned when parsing a Map from a string fails.
 #[derive(Debug)]
 pub enum ParseMapError {
+    /// The map is empty.
     Empty,
-    NotRectangular,
+    /// The map is not rectangular.
+    NotRectangular {
+        /// Line on which the error occured.
+        line: usize,
+        /// Number of cells found.
+        found: usize,
+        /// Number of cells expected.
+        expected: usize,
+    },
 }
 
 impl Error for ParseMapError {}
@@ -21,7 +31,13 @@ impl Display for ParseMapError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ParseMapError::Empty => write!(f, "map is empty"),
-            ParseMapError::NotRectangular => write!(f, "map is not rectangular"),
+            ParseMapError::NotRectangular { line, found, expected } => {
+                write!(
+                    f,
+                    "map is not rectangular (line {}, expected {} cells, found {})",
+                    line, expected, found
+                )
+            }
         }
     }
 }
@@ -58,7 +74,7 @@ impl FromStr for Map {
             if nrow == 1 {
                 ncol = ncell;
             } else if ncell != ncol {
-                return Err(NotRectangular);
+                return Err(NotRectangular { line: nrow, found: ncell, expected: ncol });
             }
         }
         if cells.is_empty() {

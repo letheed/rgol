@@ -23,7 +23,8 @@ use std::{
     str::FromStr,
 };
 
-use map::{Map, ParseMapError};
+use map::Map;
+pub use map::ParseMapError;
 
 mod map;
 
