@@ -6,7 +6,7 @@
 use std::{result::Result as StdResult, time::Duration};
 
 use anyhow::Context;
-use clap::ArgMatches;
+use clap::{App, ArgMatches};
 use rgol::World;
 
 mod screen;
@@ -20,7 +20,15 @@ MAPS:
 type Result<T = ()> = anyhow::Result<T>;
 
 fn main() -> Result {
-    #[allow(deprecated)]
+    match app().get_matches().subcommand() {
+        Some(("genmap", args)) => genmap(args),
+        Some(("play", args)) => play(args),
+        _ => unreachable!("SubcommandRequiredElseHelp prevents `None`"),
+    }
+}
+
+#[allow(deprecated)]
+fn app() -> App<'static> {
     use clap::{clap_app, crate_authors, crate_description, crate_version};
 
     fn is_number(s: &str) -> StdResult<(), String> {
@@ -31,8 +39,7 @@ fn main() -> Result {
         }
     }
 
-    #[allow(deprecated)]
-    let matches = clap_app!(rgol =>
+    clap_app!(rgol =>
         (author: crate_authors!())
         (version: crate_version!())
         (about: crate_description!())
@@ -49,13 +56,11 @@ fn main() -> Result {
             (@arg TICK_MS: {is_number} "Elapsed time between iterations in ms")
         )
     )
-    .get_matches();
+}
 
-    match matches.subcommand() {
-        Some(("genmap", args)) => genmap(args),
-        Some(("play", args)) => play(args),
-        _ => unreachable!("SubcommandRequiredElseHelp prevents `None`"),
-    }
+#[test]
+fn verify_app() {
+    app().debug_assert();
 }
 
 /// "genmap" subcommand.
