@@ -126,13 +126,13 @@ impl Grid {
     pub fn tick(&mut self) {
         for i in 0..self.nrow {
             for j in 0..self.ncol {
-                let live_neighbours = self.live_neighbours((i, j));
+                let live_neighbors = self.live_neighbors((i, j));
                 let cell = &mut self[(i, j)];
                 if !cell.alive {
-                    if live_neighbours == 3 {
+                    if live_neighbors == 3 {
                         cell.lives = true;
                     }
-                } else if live_neighbours != 2 && live_neighbours != 3 {
+                } else if live_neighbors != 2 && live_neighbors != 3 {
                     cell.lives = false;
                 }
             }
@@ -155,19 +155,19 @@ impl Grid {
         Self { cells: cells.into_boxed_slice(), nrow, ncol }
     }
 
-    /// Returns the number of living neighbours for a cell.
+    /// Returns the number of living neighbors for a cell.
     #[must_use]
-    fn live_neighbours(&self, (i, j): (usize, usize)) -> u8 {
+    fn live_neighbors(&self, (i, j): (usize, usize)) -> u8 {
         use std::cmp::min;
 
-        let mut live_neighbours = 0_u8;
+        let mut live_neighbors = 0_u8;
         for m in i.saturating_sub(1)..min(i + 2, self.nrow) {
             for n in j.saturating_sub(1)..min(j + 2, self.ncol) {
                 if self[(m, n)].alive && (m != i || n != j) {
-                    live_neighbours += 1;
+                    live_neighbors += 1;
                 }
             }
         }
-        live_neighbours
+        live_neighbors
     }
 }
