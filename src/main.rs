@@ -116,7 +116,7 @@ fn play_world(mut world: World, tick: Duration) -> Result {
     loop {
         screen.clear();
         println!("{world}");
-        world.next();
+        world.tick();
         deadline += tick;
         if sigtrap.wait(deadline).is_some() {
             return Ok(());
@@ -150,7 +150,7 @@ fn play_world(mut world: World, tick: Duration) -> Result {
         loop {
             screen.clear();
             println!("{world}");
-            world.next();
+            world.tick();
             deadline += tick;
             let duration = deadline.saturating_duration_since(Instant::now());
             // TODO Use `Receiver::recv_deadline` when it becomes stable.

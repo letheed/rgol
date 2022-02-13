@@ -123,7 +123,7 @@ impl Grid {
     /// Births and deaths happen simultaneously according to the rules
     /// of Conway's Game of Life, after which the grid contains
     /// the next generation.
-    pub fn next(&mut self) {
+    pub fn tick(&mut self) {
         for i in 0..self.nrow {
             for j in 0..self.ncol {
                 let live_neighbours = self.live_neighbours((i, j));

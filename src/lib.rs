@@ -55,9 +55,9 @@ impl World {
     /// Increments the time by one tick.
     ///
     /// The next generation will replace the current one.
-    pub fn next(&mut self) {
+    pub fn tick(&mut self) {
         self.generation += 1;
-        self.grid.next();
+        self.grid.tick();
     }
 }
 
