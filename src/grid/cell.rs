@@ -1,12 +1,16 @@
 /// A cell that can be dead or alive.
-///
-/// When creating a new cell, both flags should be set to the same value.
+
+// # Invariants
+//
+// When creating a new `Cell`, both flags must be set to the same value.
+// The fields must remain equal, excepted during the tick, when a living cell may
+// die and a dead cell may come alive.
 #[allow(clippy::manual_non_exhaustive)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Cell {
     /// Is the cell alive?
     pub alive: bool,
-    /// Does the cell live or die at the end of this turn?
+    /// Will the cell live or die?
     pub lives: bool,
     #[doc(hidden)]
     _private: (),
