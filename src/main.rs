@@ -12,17 +12,17 @@ use rgol::World;
 mod screen;
 
 const TICK_MS: u64 = 50;
-const MAPS_MSG: &str = "\
-MAPS:
-    Maps must be rectangular. Whitespace is ignored.
+const GRIDS_MSG: &str = "\
+GRIDS:
+    Grids must be rectangular. Whitespace is ignored.
     '·' (U+00B7 MIDDLE DOT) is a dead cell. Anything else is a living cell.";
 
 type Result<T = ()> = anyhow::Result<T>;
 
 fn main() -> Result {
     match app().get_matches().subcommand() {
-        Some(("genmap", args)) => genmap(args),
-        Some(("play", args)) => play(args),
+        Some(("grid", args)) => grid_subcommand(args),
+        Some(("play", args)) => play_subcommand(args),
         _ => unreachable!("SubcommandRequiredElseHelp prevents `None`"),
     }
 }
@@ -43,16 +43,16 @@ fn app() -> App<'static> {
         (author: crate_authors!())
         (version: crate_version!())
         (about: crate_description!())
-        (after_help: MAPS_MSG)
+        (after_help: GRIDS_MSG)
         (@setting SubcommandRequiredElseHelp)
-        (@subcommand genmap =>
-            (about: "Prints an empty map")
+        (@subcommand grid =>
+            (about: "Prints an empty grid")
             (@arg NROW: {is_number} * "Number of rows")
             (@arg NCOL: {is_number} * "Number of columns")
-            (@arg space: -s --space "Adds spaces to the map"))
+            (@arg space: -s --space "Adds spaces to the grid"))
         (@subcommand play =>
             (about: "Plays the game (CTRL-c to exit)")
-            (@arg FILE: * "File containing the map")
+            (@arg FILE: * "File containing the grid")
             (@arg TICK_MS: {is_number} "Elapsed time between iterations in ms")
         )
     )
@@ -63,10 +63,8 @@ fn verify_app() {
     app().debug_assert();
 }
 
-/// "genmap" subcommand.
-///
-/// Prints an empty map.
-fn genmap(args: &ArgMatches) -> Result {
+/// Prints an empty grid.
+fn grid_subcommand(args: &ArgMatches) -> Result {
     let nrow: usize = args.value_of_t("NROW")?;
     let ncol: usize = args.value_of_t("NCOL")?;
     if nrow == 0 || ncol == 0 {
@@ -85,10 +83,8 @@ fn genmap(args: &ArgMatches) -> Result {
     Ok(())
 }
 
-/// "play" subcommand.
-///
-/// Loads a map from a file and plays it.
-fn play(args: &ArgMatches) -> Result {
+/// Loads a grid from a file and plays it.
+fn play_subcommand(args: &ArgMatches) -> Result {
     use clap::ErrorKind;
 
     let filename = args.value_of("FILE").expect("FILE is required");

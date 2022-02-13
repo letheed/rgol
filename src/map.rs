@@ -9,12 +9,12 @@ use cell::Cell;
 
 mod cell;
 
-/// An error returned when parsing a Map from a string fails.
+/// An error returned when parsing a [`Grid`] from a string failed.
 #[derive(Debug)]
-pub enum ParseMapError {
-    /// The map is empty.
+pub enum ParseGridError {
+    /// The grid is empty.
     Empty,
-    /// The map is not rectangular.
+    /// The grid is not rectangular.
     NotRectangular {
         /// Line on which the error occured.
         line: usize,
@@ -25,38 +25,34 @@ pub enum ParseMapError {
     },
 }
 
-impl Error for ParseMapError {}
+impl Error for ParseGridError {}
 
-impl Display for ParseMapError {
+impl Display for ParseGridError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ParseMapError::Empty => write!(f, "map is empty"),
-            ParseMapError::NotRectangular { line, found, expected } => {
-                write!(
-                    f,
-                    "map is not rectangular (line {}, expected {} cells, found {})",
-                    line, expected, found
-                )
+            ParseGridError::Empty => "grid is empty".fmt(f),
+            ParseGridError::NotRectangular { line, found, expected } => {
+                write!(f, "grid is not rectangular (line {line}, expected {expected} cells, found {found})")
             }
         }
     }
 }
 
-/// A rectangular map of the world containing cells.
-pub struct Map {
+/// A rectangular grid of [`Cell`]s for the Game of Life.
+pub struct Grid {
     /// Array storing the cells in row-major order.
     cells: Box<[Cell]>,
-    /// Number of rows in the map.
+    /// Number of rows in the grid.
     nrow: usize,
-    /// Number of columns in the map.
+    /// Number of columns in the grid.
     ncol: usize,
 }
 
-impl FromStr for Map {
-    type Err = ParseMapError;
+impl FromStr for Grid {
+    type Err = ParseGridError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use ParseMapError::{Empty, NotRectangular};
+        use ParseGridError::{Empty, NotRectangular};
 
         let mut nrow = 0;
         let mut ncol = 0;
@@ -84,7 +80,7 @@ impl FromStr for Map {
     }
 }
 
-impl Index<(usize, usize)> for Map {
+impl Index<(usize, usize)> for Grid {
     type Output = Cell;
 
     fn index(&self, (i, j): (usize, usize)) -> &Self::Output {
@@ -92,13 +88,13 @@ impl Index<(usize, usize)> for Map {
     }
 }
 
-impl IndexMut<(usize, usize)> for Map {
+impl IndexMut<(usize, usize)> for Grid {
     fn index_mut(&mut self, (i, j): (usize, usize)) -> &mut Self::Output {
         &mut self.cells[i * self.ncol + j]
     }
 }
 
-impl Display for Map {
+impl Display for Grid {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for row in self.cells.chunks(self.ncol) {
             for cell in row {
@@ -114,8 +110,8 @@ impl Display for Map {
     }
 }
 
-impl Map {
-    /// Returns the vertical and horizontal dimensions of the map.
+impl Grid {
+    /// Returns the vertical and horizontal dimensions of the grid.
     #[must_use]
     pub const fn dim(&self) -> (usize, usize) {
         (self.nrow, self.ncol)
@@ -124,7 +120,7 @@ impl Map {
     /// Increments the time by one tick.
     ///
     /// Births and deaths happen simultaneously according to the rules
-    /// of Conway's Game of Life, after which the map contains
+    /// of Conway's Game of Life, after which the grid contains
     /// the next generation.
     pub fn next(&mut self) {
         for i in 0..self.nrow {
@@ -146,8 +142,8 @@ impl Map {
     }
 }
 
-impl Map {
-    /// Creates a `Map` from a vector of `Cell`s and a pair of dimensions.
+impl Grid {
+    /// Creates a `Grid` from a vector of `Cell`s and a pair of dimensions.
     ///
     /// # Panics
     ///

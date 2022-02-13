@@ -2,12 +2,12 @@
 
 ## Usage
 
-Generate an empty map, edit it and play it like so:
+Generate an empty grid, edit it and play it like so:
 
 ```bash
-rgol genmap 40 40 > map
-nano map
-rgol play map
+rgol grid 40 40 > grid
+nano grid
+rgol play grid
 ```
 
 For more information, run `rgol --help`.

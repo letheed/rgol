@@ -3,12 +3,12 @@
 //! This library is not meant for general usage.
 //! It does not use any of the established file formats for the Game of Life.
 //!
-//! It can only do three things: parse a map to create a world, make it tick,
+//! It can only do three things: parse a string to create a [`Grid`], make it tick,
 //! and print it.
 //!
-//! # Maps
+//! # Grids
 //!
-//! Maps must be rectangular. Whitespace is ignored.
+//! Grids must be rectangular. Whitespace is ignored.
 //!
 //! ‘·’ (U+00B7 MIDDLE DOT) is a dead cell. Anything else is a living cell.
 
@@ -23,21 +23,21 @@ use std::{
     str::FromStr,
 };
 
-use map::Map;
-pub use map::ParseMapError;
+use map::Grid;
+pub use map::ParseGridError;
 
 mod map;
 
 /// World for the Game of Life.
 ///
-/// Contains a `Map` of `Cell`s and keeps track of the generation.
+/// Contains a `Grid` of `Cell`s and keeps track of the generation.
 pub struct World {
-    map: Map,
+    grid: Grid,
     generation: u64,
 }
 
 impl FromStr for World {
-    type Err = ParseMapError;
+    type Err = ParseGridError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::new(s.parse()?))
@@ -46,7 +46,7 @@ impl FromStr for World {
 
 impl Display for World {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n{:?}, generation: {}", self.map, self.map.dim(), self.generation)
+        write!(f, "{}\n{:?}, generation: {}", self.grid, self.grid.dim(), self.generation)
     }
 }
 
@@ -56,14 +56,14 @@ impl World {
     /// The next generation will replace the current one.
     pub fn next(&mut self) {
         self.generation += 1;
-        self.map.next();
+        self.grid.next();
     }
 }
 
 impl World {
-    /// Creates a new `World` from a `Map` seed (ie. generation 0).
+    /// Creates a new `World` from a `Grid` seed (ie. generation 0).
     #[must_use]
-    const fn new(seed: Map) -> Self {
-        Self { map: seed, generation: 0 }
+    const fn new(seed: Grid) -> Self {
+        Self { grid: seed, generation: 0 }
     }
 }
