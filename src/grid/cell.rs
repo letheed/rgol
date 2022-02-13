@@ -2,6 +2,7 @@
 ///
 /// When creating a new cell, both flags should be set to the same value.
 #[allow(clippy::manual_non_exhaustive)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Cell {
     /// Is the cell alive?
     pub alive: bool,

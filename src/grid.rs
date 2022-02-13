@@ -10,7 +10,7 @@ use cell::Cell;
 mod cell;
 
 /// An error returned when parsing a [`Grid`] from a string failed.
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ParseGridError {
     /// The grid is empty.
     Empty,
@@ -39,6 +39,7 @@ impl Display for ParseGridError {
 }
 
 /// A rectangular grid of [`Cell`]s for the Game of Life.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Grid {
     /// Array storing the cells in row-major order.
     cells: Box<[Cell]>,

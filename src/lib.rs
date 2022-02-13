@@ -31,6 +31,7 @@ mod grid;
 /// World for the Game of Life.
 ///
 /// Contains a `Grid` of `Cell`s and keeps track of the generation.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct World {
     grid: Grid,
     generation: u64,

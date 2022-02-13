@@ -9,6 +9,7 @@ static SCREEN_INSTANTIATED: AtomicBool = AtomicBool::new(false);
 /// Changes are reversed when the handle is dropped.
 ///
 /// There can only be one instance of `Screen` alive at any time.
+#[derive(Debug)]
 pub struct Screen(());
 
 impl Drop for Screen {
