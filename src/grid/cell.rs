@@ -9,9 +9,9 @@
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Cell {
     /// Is the cell alive?
-    pub alive: bool,
+    pub(super) alive: bool,
     /// Will the cell live or die?
-    pub lives: bool,
+    pub(super) lives: bool,
     #[doc(hidden)]
     _private: (),
 }
@@ -27,5 +27,11 @@ impl Cell {
     #[must_use]
     pub const fn new_dead() -> Self {
         Self { alive: false, lives: false, _private: () }
+    }
+
+    /// Is the cell alive?
+    #[must_use]
+    pub const fn is_alive(&self) -> bool {
+        self.alive
     }
 }

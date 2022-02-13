@@ -7,7 +7,7 @@ use std::{
 
 use cell::Cell;
 
-mod cell;
+pub mod cell;
 
 /// An error returned when parsing a [`Grid`] from a string failed.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

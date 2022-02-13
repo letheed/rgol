@@ -24,7 +24,7 @@ use std::{
 };
 
 use grid::Grid;
-pub use grid::ParseGridError;
+pub use grid::{cell::Cell, ParseGridError};
 
 mod grid;
 
