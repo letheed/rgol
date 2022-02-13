@@ -116,6 +116,7 @@ impl Display for Map {
 
 impl Map {
     /// Returns the vertical and horizontal dimensions of the map.
+    #[must_use]
     pub const fn dim(&self) -> (usize, usize) {
         (self.nrow, self.ncol)
     }
@@ -151,12 +152,14 @@ impl Map {
     /// # Panics
     ///
     /// Panics if the number of cells is not `nrow * ncol`.
+    #[must_use]
     fn from_parts(cells: Vec<Cell>, (nrow, ncol): (usize, usize)) -> Self {
         assert_eq!(cells.len(), nrow * ncol);
         Self { cells: cells.into_boxed_slice(), nrow, ncol }
     }
 
     /// Returns the number of living neighbours for a cell.
+    #[must_use]
     fn live_neighbours(&self, (i, j): (usize, usize)) -> u8 {
         use std::cmp::min;
 

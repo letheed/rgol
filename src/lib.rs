@@ -62,6 +62,7 @@ impl World {
 
 impl World {
     /// Creates a new `World` from a `Map` seed (ie. generation 0).
+    #[must_use]
     const fn new(seed: Map) -> Self {
         Self { map: seed, generation: 0 }
     }
