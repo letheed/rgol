@@ -23,10 +23,10 @@ use std::{
     str::FromStr,
 };
 
-use map::Grid;
-pub use map::ParseGridError;
+use grid::Grid;
+pub use grid::ParseGridError;
 
-mod map;
+mod grid;
 
 /// World for the Game of Life.
 ///
