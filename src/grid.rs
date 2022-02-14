@@ -16,7 +16,7 @@ pub enum ParseGridError {
     Empty,
     /// The grid is not rectangular.
     NotRectangular {
-        /// Line on which the error occured.
+        /// Line on which the error occurred.
         line: usize,
         /// Number of cells found.
         found: usize,

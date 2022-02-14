@@ -153,7 +153,7 @@ fn play_world(mut world: World, tick: Duration) -> Result {
             world.tick();
             deadline += tick;
             let duration = deadline.saturating_duration_since(Instant::now());
-            // TODO Use `Receiver::recv_deadline` when it becomes stable.
+            // TODO: Use `Receiver::recv_deadline` when it becomes stable.
             match receiver.recv_timeout(duration) {
                 Err(RecvTimeoutError::Timeout) => {}
                 Ok(()) | Err(RecvTimeoutError::Disconnected) => return,

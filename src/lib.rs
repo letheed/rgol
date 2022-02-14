@@ -3,7 +3,7 @@
 //! This library is not meant for general usage.
 //! It does not use any of the established file formats for the Game of Life.
 //!
-//! It can only do three things: parse a string to create a [`Grid`], make it tick,
+//! FIXME: It can only do three things: parse a string to create a [`Grid`], make it tick,
 //! and print it.
 //!
 //! # Grids
