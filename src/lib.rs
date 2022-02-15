@@ -42,12 +42,12 @@ mod grid;
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct World {
     /// The grid of cells.
-    grid: Grid,
+    pub grid: Grid,
     /// Number of generations passed.
     ///
     /// Starts at zero (the seed) and increases by one for every call to
     /// [`tick`](Self::tick).
-    generation: u64,
+    pub generation: u64,
 }
 
 impl FromStr for World {
@@ -65,6 +65,12 @@ impl Display for World {
 }
 
 impl World {
+    /// Creates a new `World` from a seed (generation 0).
+    #[must_use]
+    pub const fn new(seed: Grid) -> Self {
+        Self { grid: seed, generation: 0 }
+    }
+
     /// Make time tick. The next generation of cells will replace
     /// the current one.
     ///
@@ -74,13 +80,5 @@ impl World {
     pub fn tick(&mut self) {
         self.generation += 1;
         self.grid.tick();
-    }
-}
-
-impl World {
-    /// Creates a new `World` from a seed (generation 0).
-    #[must_use]
-    const fn new(seed: Grid) -> Self {
-        Self { grid: seed, generation: 0 }
     }
 }
