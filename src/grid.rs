@@ -5,7 +5,7 @@ use std::{
 };
 
 use cell::Cell;
-use error::{GridSizeError, ParseGridError};
+use error::{GridParseError, GridSizeError};
 
 pub mod cell;
 pub mod error;
@@ -26,10 +26,10 @@ pub struct Grid {
 }
 
 impl FromStr for Grid {
-    type Err = ParseGridError;
+    type Err = GridParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        use ParseGridError::{Empty, NotRectangular};
+        use GridParseError::{Empty, NotRectangular};
 
         let mut nrow = 0;
         let mut ncol = 0;

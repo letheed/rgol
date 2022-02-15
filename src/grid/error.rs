@@ -25,7 +25,7 @@ impl Display for GridSizeError {
 /// An error returned when parsing a [`Grid`](super::Grid) from a [`String`]
 /// failed.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum ParseGridError {
+pub enum GridParseError {
     /// The grid is empty.
     Empty,
     /// The grid is not rectangular.
@@ -39,13 +39,13 @@ pub enum ParseGridError {
     },
 }
 
-impl Error for ParseGridError {}
+impl Error for GridParseError {}
 
-impl Display for ParseGridError {
+impl Display for GridParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ParseGridError::Empty => "grid is empty".fmt(f),
-            ParseGridError::NotRectangular { line, found, expected } => {
+            GridParseError::Empty => "grid is empty".fmt(f),
+            GridParseError::NotRectangular { line, found, expected } => {
                 write!(f, "grid is not rectangular (line {line}, expected {expected} cells, found {found})")
             }
         }

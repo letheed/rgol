@@ -30,7 +30,7 @@ use std::{
 
 pub use grid::{
     cell::Cell,
-    error::{GridSizeError, ParseGridError},
+    error::{GridParseError, GridSizeError},
     Grid,
 };
 
@@ -51,7 +51,7 @@ pub struct World {
 }
 
 impl FromStr for World {
-    type Err = ParseGridError;
+    type Err = GridParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(Self::new(s.parse()?))
