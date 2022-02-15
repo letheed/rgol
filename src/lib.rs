@@ -1,12 +1,17 @@
-//! A simple implementation of Conway's Game of Life.
+//! A simple implementation of Conway's Game of Life for terminal.
+//!
+//! # About
 //!
 //! This library is not meant for general usage.
-//! It does not use any of the established file formats for the Game of Life.
 //!
-//! FIXME: It can only do three things: parse a string to create a [`Grid`], make it tick,
-//! and print it.
+//! It does not use any of the established file formats for the Game of Life,
+//! nor does it make any particular attempt at speed.
 //!
-//! # Grids
+//! It can parse a [`String`] to create a [`Grid`], make it tick, and print it.
+//!
+//! [`World`] will do the same and keep track of the generation as well.
+//!
+//! # Grid format
 //!
 //! Grids must be rectangular. Whitespace is ignored.
 //!
@@ -28,12 +33,17 @@ pub use grid::{cell::Cell, ParseGridError};
 
 mod grid;
 
-/// World for the Game of Life.
+/// A convenience wrapper for [`Grid`]. It keeps track of the generation.
 ///
-/// Contains a `Grid` of `Cell`s and keeps track of the generation.
+/// It will print the size of the grid and the generation as well.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct World {
+    /// The grid of cells.
     grid: Grid,
+    /// Number of generations passed.
+    ///
+    /// Starts at zero (the seed) and increases by one for every call to
+    /// [`tick`](Self::tick).
     generation: u64,
 }
 
@@ -52,9 +62,12 @@ impl Display for World {
 }
 
 impl World {
-    /// Increments the time by one tick.
+    /// Make time tick. The next generation of cells will replace
+    /// the current one.
     ///
-    /// The next generation will replace the current one.
+    /// Births and deaths happen simultaneously according to the rules
+    /// of Conway's Game of Life, after which the grid contains
+    /// the next generation.
     pub fn tick(&mut self) {
         self.generation += 1;
         self.grid.tick();
@@ -62,7 +75,7 @@ impl World {
 }
 
 impl World {
-    /// Creates a new `World` from a `Grid` seed (ie. generation 0).
+    /// Creates a new `World` from a seed (generation 0).
     #[must_use]
     const fn new(seed: Grid) -> Self {
         Self { grid: seed, generation: 0 }

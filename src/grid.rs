@@ -38,7 +38,11 @@ impl Display for ParseGridError {
     }
 }
 
-/// A rectangular grid of [`Cell`]s for the Game of Life.
+/// An opaque container representing a rectangular grid of [`Cell`]s for
+/// playing the Game of Life.
+///
+/// The grid is stored in row-major order.
+#[must_use]
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Grid {
     /// Array storing the cells in row-major order.
@@ -112,13 +116,14 @@ impl Display for Grid {
 }
 
 impl Grid {
-    /// Returns the vertical and horizontal dimensions of the grid.
+    /// Returns the number of rows and columns of the grid.
     #[must_use]
     pub const fn dim(&self) -> (usize, usize) {
         (self.nrow, self.ncol)
     }
 
-    /// Increments the time by one tick.
+    /// Make time tick. The next generation of cells will replace
+    /// the current one.
     ///
     /// Births and deaths happen simultaneously according to the rules
     /// of Conway's Game of Life, after which the grid contains
@@ -144,12 +149,13 @@ impl Grid {
 }
 
 impl Grid {
-    /// Creates a `Grid` from a vector of `Cell`s and a pair of dimensions.
+    /// Creates a `Grid` from a vector of `Cell`s and a matching `Grid` size.
     ///
     /// # Panics
     ///
-    /// Panics if the number of cells is not `nrow * ncol`.
-    #[must_use]
+    /// Panics if:
+    /// * nrow or ncol is 0.
+    /// * the number of cells is not `nrow * ncol`.
     fn from_parts(cells: Vec<Cell>, (nrow, ncol): (usize, usize)) -> Self {
         assert_eq!(cells.len(), nrow * ncol);
         Self { cells: cells.into_boxed_slice(), nrow, ncol }

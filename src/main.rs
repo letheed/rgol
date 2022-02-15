@@ -98,9 +98,8 @@ fn play_subcommand(args: &ArgMatches) -> Result {
     play_world(world, tick)
 }
 
-/// Plays the world.
-///
-/// Prints every generation to the terminal screen.
+/// Plays a world and prints every generation to the terminal.
+
 #[cfg(target_os = "linux")]
 // The `signal` crate only defines `Trap::wait` for linux, though it should
 // work anywhere `sigtimedwait` is defined (which doesn’t include macOS).
@@ -124,9 +123,8 @@ fn play_world(mut world: World, tick: Duration) -> Result {
     }
 }
 
-/// Plays the world.
-///
-/// Prints every generation to the terminal screen.
+/// Plays a world and prints every generation to the terminal.
+
 #[cfg(all(unix, not(target_os = "linux")))]
 // Anywhere `Trap::wait` isn’t defined we’ll have to rely on `sigwait`
 // (through `Iterator::next`) though presumably some of those targets

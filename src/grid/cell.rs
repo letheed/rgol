@@ -1,4 +1,4 @@
-/// A cell that can be dead or alive.
+/// A cell is either dead or alive.
 
 // # Invariants
 //
