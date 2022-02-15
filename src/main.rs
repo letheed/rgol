@@ -7,7 +7,7 @@ use std::{result::Result as StdResult, time::Duration};
 
 use anyhow::Context;
 use clap::{App, ArgMatches};
-use rgol::World;
+use rgol::{GridSizeError, World};
 
 mod screen;
 
@@ -68,7 +68,7 @@ fn grid_subcommand(args: &ArgMatches) -> Result {
     let nrow: usize = args.value_of_t("NROW")?;
     let ncol: usize = args.value_of_t("NCOL")?;
     if nrow == 0 || ncol == 0 {
-        return Ok(());
+        return Err(GridSizeError::Zero.into());
     }
     let line = if args.is_present("space") {
         let mut line = "· ".repeat(ncol);
