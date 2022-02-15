@@ -28,8 +28,11 @@ use std::{
     str::FromStr,
 };
 
-use grid::Grid;
-pub use grid::{cell::Cell, error::ParseGridError};
+pub use grid::{
+    cell::Cell,
+    error::{GridSizeError, ParseGridError},
+    Grid,
+};
 
 mod grid;
 

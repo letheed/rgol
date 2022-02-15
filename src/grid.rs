@@ -5,7 +5,7 @@ use std::{
 };
 
 use cell::Cell;
-use error::ParseGridError;
+use error::{GridSizeError, ParseGridError};
 
 pub mod cell;
 pub mod error;
@@ -57,6 +57,18 @@ impl FromStr for Grid {
     }
 }
 
+impl AsRef<[Cell]> for Grid {
+    fn as_ref(&self) -> &[Cell] {
+        &self.cells
+    }
+}
+
+impl AsMut<[Cell]> for Grid {
+    fn as_mut(&mut self) -> &mut [Cell] {
+        &mut self.cells
+    }
+}
+
 impl Index<(usize, usize)> for Grid {
     type Output = Cell;
 
@@ -88,10 +100,39 @@ impl Display for Grid {
 }
 
 impl Grid {
+    /// Creates a new `Grid` of dead cells.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `nrow` or `ncol` is 0.
+    pub fn new((nrow, ncol): (usize, usize)) -> Result<Self, GridSizeError> {
+        if nrow == 0 || ncol == 0 {
+            Err(GridSizeError::Zero)
+        } else {
+            Ok(Self::from_parts(vec![Cell::new_dead(); nrow * ncol], (nrow, ncol)))
+        }
+    }
+
     /// Returns the number of rows and columns of the grid.
     #[must_use]
     pub const fn dim(&self) -> (usize, usize) {
         (self.nrow, self.ncol)
+    }
+
+    /// Returns the number of living neighbors for a cell.
+    #[must_use]
+    pub fn live_neighbors(&self, (i, j): (usize, usize)) -> u8 {
+        use std::cmp::min;
+
+        let mut live_neighbors = 0;
+        for m in i.saturating_sub(1)..min(i + 2, self.nrow) {
+            for n in j.saturating_sub(1)..min(j + 2, self.ncol) {
+                if self[(m, n)].alive && (m != i || n != j) {
+                    live_neighbors += 1;
+                }
+            }
+        }
+        live_neighbors
     }
 
     /// Make time tick. The next generation of cells will replace
@@ -129,23 +170,9 @@ impl Grid {
     /// * nrow or ncol is 0.
     /// * the number of cells is not `nrow * ncol`.
     fn from_parts(cells: Vec<Cell>, (nrow, ncol): (usize, usize)) -> Self {
-        assert_eq!(cells.len(), nrow * ncol);
+        assert!(nrow != 0, "attempted to create a zero-sized grid");
+        assert!(ncol != 0, "attempted to create a zero-sized grid");
+        assert_eq!(nrow * ncol, cells.len(), "putative grid size does not match the number of cells");
         Self { cells: cells.into_boxed_slice(), nrow, ncol }
-    }
-
-    /// Returns the number of living neighbors for a cell.
-    #[must_use]
-    fn live_neighbors(&self, (i, j): (usize, usize)) -> u8 {
-        use std::cmp::min;
-
-        let mut live_neighbors = 0_u8;
-        for m in i.saturating_sub(1)..min(i + 2, self.nrow) {
-            for n in j.saturating_sub(1)..min(j + 2, self.ncol) {
-                if self[(m, n)].alive && (m != i || n != j) {
-                    live_neighbors += 1;
-                }
-            }
-        }
-        live_neighbors
     }
 }
