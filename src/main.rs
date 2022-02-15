@@ -35,7 +35,7 @@ fn app() -> App<'static> {
         if s.chars().all(|c| c.is_digit(10)) {
             Ok(())
         } else {
-            Err(format!("expected a number, found \"{}\"", s))
+            Err(format!("expected a number (digits only), found \"{}\"", s))
         }
     }
 
@@ -44,16 +44,18 @@ fn app() -> App<'static> {
         (version: crate_version!())
         (about: crate_description!())
         (after_help: GRIDS_MSG)
+        (@setting DisableHelpSubcommand)
         (@setting SubcommandRequiredElseHelp)
         (@subcommand grid =>
-            (about: "Prints an empty grid")
+            (about: "Print a grid of dead cells")
             (@arg NROW: {is_number} * "Number of rows")
             (@arg NCOL: {is_number} * "Number of columns")
-            (@arg space: -s --space "Adds spaces to the grid"))
+            (@arg space: -s --space "Add spaces to the grid"))
         (@subcommand play =>
-            (about: "Plays the game (CTRL-c to exit)")
+            (about: "Load a grid from a file and play it (CTRL-c to exit)")
+            (after_help: GRIDS_MSG)
             (@arg FILE: * "File containing the grid")
-            (@arg TICK_MS: {is_number} "Elapsed time between iterations in ms")
+            (@arg TICK_MS: {is_number} "Elapsed time between ticks in ms")
         )
     )
 }
@@ -63,7 +65,7 @@ fn verify_app() {
     app().debug_assert();
 }
 
-/// Prints an empty grid.
+/// Prints a grid of dead cells.
 fn grid_subcommand(args: &ArgMatches) -> Result {
     let nrow: usize = args.value_of_t("NROW")?;
     let ncol: usize = args.value_of_t("NCOL")?;
