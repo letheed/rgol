@@ -60,7 +60,7 @@ impl FromStr for World {
 
 impl Display for World {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}\n{:?}, generation: {}", self.grid, self.grid.dim(), self.generation)
+        write!(f, "{}\n{:?}, generation: {}", self.grid, self.grid.size(), self.generation)
     }
 }
 

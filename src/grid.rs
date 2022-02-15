@@ -115,7 +115,7 @@ impl Grid {
 
     /// Returns the number of rows and columns of the grid.
     #[must_use]
-    pub const fn dim(&self) -> (usize, usize) {
+    pub const fn size(&self) -> (usize, usize) {
         (self.nrow, self.ncol)
     }
 
