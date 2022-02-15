@@ -3,9 +3,9 @@
 #![warn(clippy::nursery)]
 #![deny(unsafe_code)]
 
-use std::{result::Result as StdResult, time::Duration};
+use std::time::Duration;
 
-use anyhow::Context;
+use anyhow::{bail, Context};
 use clap::{App, ArgMatches};
 use rgol::{GridSizeError, World};
 
@@ -17,9 +17,9 @@ GRIDS:
     Grids must be rectangular. Whitespace is ignored.
     '·' (U+00B7 MIDDLE DOT) is a dead cell. Anything else is a living cell.";
 
-type Result<T = ()> = anyhow::Result<T>;
+type AnyResult<T = ()> = anyhow::Result<T>;
 
-fn main() -> Result {
+fn main() -> AnyResult {
     match app().get_matches().subcommand() {
         Some(("grid", args)) => grid_subcommand(args),
         Some(("play", args)) => play_subcommand(args),
@@ -31,7 +31,7 @@ fn main() -> Result {
 fn app() -> App<'static> {
     use clap::{clap_app, crate_authors, crate_description, crate_version};
 
-    fn is_number(s: &str) -> StdResult<(), String> {
+    fn is_number(s: &str) -> Result<(), String> {
         if s.chars().all(|c| c.is_digit(10)) {
             Ok(())
         } else {
@@ -66,7 +66,7 @@ fn verify_app() {
 }
 
 /// Prints a grid of dead cells.
-fn grid_subcommand(args: &ArgMatches) -> Result {
+fn grid_subcommand(args: &ArgMatches) -> AnyResult {
     let nrow: usize = args.value_of_t("NROW")?;
     let ncol: usize = args.value_of_t("NCOL")?;
     if nrow == 0 || ncol == 0 {
@@ -86,7 +86,7 @@ fn grid_subcommand(args: &ArgMatches) -> Result {
 }
 
 /// Loads a grid from a file and plays it.
-fn play_subcommand(args: &ArgMatches) -> Result {
+fn play_subcommand(args: &ArgMatches) -> AnyResult {
     use clap::ErrorKind;
 
     let filename = args.value_of("FILE").expect("FILE is required");
@@ -95,8 +95,8 @@ fn play_subcommand(args: &ArgMatches) -> Result {
         result => result,
     }?;
     let tick = Duration::from_millis(tick_ms);
-    let world = { || -> Result<_> { Ok(std::fs::read_to_string(filename)?.parse()?) } }()
-        .with_context(|| format!("in {}", filename))?;
+    let load_world = || -> AnyResult<_> { Ok(std::fs::read_to_string(filename)?.parse()?) };
+    let world = load_world().with_context(|| format!("in {}", filename))?;
     play_world(world, tick)
 }
 
@@ -105,7 +105,7 @@ fn play_subcommand(args: &ArgMatches) -> Result {
 // The `signal` crate only defines `Trap::wait` for linux, though it should
 // work anywhere `sigtimedwait` is defined (which doesn’t include macOS).
 #[cfg(target_os = "linux")]
-fn play_world(mut world: World, tick: Duration) -> Result {
+fn play_world(mut world: World, tick: Duration) -> AnyResult {
     use std::time::Instant;
 
     use screen::Screen;
@@ -131,7 +131,7 @@ fn play_world(mut world: World, tick: Duration) -> Result {
 // (through `Iterator::next`) though presumably some of those targets
 // do define `sigtimedwait`.
 #[cfg(all(unix, not(target_os = "linux")))]
-fn play_world(mut world: World, tick: Duration) -> Result {
+fn play_world(mut world: World, tick: Duration) -> AnyResult {
     use std::{
         panic,
         sync::mpsc::{channel, RecvTimeoutError},
@@ -167,7 +167,7 @@ fn play_world(mut world: World, tick: Duration) -> Result {
     }
     match signal {
         Some(Signal::SIGINT) => Ok(()),
-        Some(_) => anyhow::bail!("`Trap` returned with unexpected {:?} signal", signal),
-        None => anyhow::bail!("`Trap` returned but no signal was received"),
+        Some(_) => bail!("`Trap` returned with unexpected {:?} signal", signal),
+        None => bail!("`Trap` returned but no signal was received"),
     }
 }

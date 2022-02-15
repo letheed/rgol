@@ -1,5 +1,9 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use anyhow::bail;
+
+use super::AnyResult;
+
 static SCREEN_INSTANTIATED: AtomicBool = AtomicBool::new(false);
 
 /// `Screen` handles the alternate terminal screen buffer.
@@ -24,10 +28,10 @@ impl Drop for Screen {
 impl Screen {
     /// Initializes the screen and returns the `Screen` handle or an error if
     /// one already exists.
-    pub fn init() -> anyhow::Result<Self> {
+    pub fn init() -> AnyResult<Self> {
         let instantiated = SCREEN_INSTANTIATED.swap(true, Ordering::SeqCst);
         if instantiated {
-            anyhow::bail!("tried to instantiate a `Screen` but one already exists");
+            bail!("tried to instantiate a `Screen` but one already exists");
         };
         print!(concat!("\x1B[?1049h", "\x1B[?25l"));
         Ok(Self(()))
